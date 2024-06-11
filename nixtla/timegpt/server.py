@@ -272,4 +272,4 @@ async def forecast_report(
 
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", port=8005, reload=True)
+    uvicorn.run("server:app", port=8007, reload=True)
