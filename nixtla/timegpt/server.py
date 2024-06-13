@@ -215,9 +215,11 @@ async def forecast_report(
         saved_forecast = ouro.elements.earth.datasets.create(
             name=f"Forecasted {body.dataset.name} {pd.Timestamp.now().timestamp()}",
             description=f"Forecasting {horizon} steps into the future using the TimeGPT model.",
-            visibility="private",
+            visibility="public",
             data=full_df,
         )
+
+        # TODO: share this with the original user
 
         post = ouro.elements.air.Editor()
         # Add a title to the report
