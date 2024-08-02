@@ -391,10 +391,9 @@ async def fast_3d(
         else:
             raise Exception(str(response.json()))
 
-        file_name = body.file.name or body.file.filename or "Image"
         return {
             "file": {
-                "name": f"{file_name} as 3D model",
+                "name": f"{body.file.name} as 3D model",
                 "description": f"Generated model from an image using the StabilityAI API.",
                 "base64": data,
                 "type": "model/gltf-binary",
