@@ -212,7 +212,7 @@ async def forecast_report(
         data["type"] = "train"
         full_df = pd.concat([data[["ds", "y", "type"]], Y_hat_df])
 
-        saved_forecast = ouro.elements.earth.datasets.create(
+        saved_forecast = ouro.datasets.create(
             name=f"Forecasted {body.dataset.name} {pd.Timestamp.now().timestamp()}",
             description=f"Forecasting {horizon} steps into the future using the TimeGPT model.",
             visibility="public",
@@ -221,7 +221,7 @@ async def forecast_report(
 
         # TODO: share this with the original user
 
-        post = ouro.elements.air.Editor()
+        post = ouro.posts.Editor()
         # Add a title to the report
         post.new_header(level=1, text=f"{body.dataset.name} Forecast")
         post.new_inline_asset(

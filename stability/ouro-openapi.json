@@ -167,6 +167,49 @@
         "x-ouro-input-asset-filter": "image",
         "x-ouro-input-asset-type": "file"
       }
+    },
+    "/3d/stable-fast-3d": {
+      "post": {
+        "summary": "Generate 3D assets from a single 2D input image",
+        "operationId": "fast_3d_3d_stable_fast_3d_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Fast3DRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-filter": "3d",
+        "x-ouro-output-asset-type": "file",
+        "x-ouro-input-asset-filter": "image",
+        "x-ouro-input-asset-type": "file"
+      }
     }
   },
   "components": {
@@ -211,6 +254,28 @@
         "type": "object",
         "required": ["file", "prompt"],
         "title": "ControlRequest"
+      },
+      "Fast3DRequest": {
+        "properties": {
+          "file": { "$ref": "#/components/schemas/File" },
+          "texture_resolution": {
+            "allOf": [{ "$ref": "#/components/schemas/TextureResolutionEnum" }],
+            "title": "Texture Resolution",
+            "description": "Determines the resolution of the textures used for both the albedo (color) map and the normal map.",
+            "default": 1024
+          },
+          "foreground_ratio": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Foreground Ratio",
+            "description": "Controls the amount of padding around the object to be processed within the frame. A higher ratio means less padding and a larger object, while a lower ratio increases the padding.",
+            "default": 0.85
+          }
+        },
+        "type": "object",
+        "required": ["file"],
+        "title": "Fast3DRequest"
       },
       "File": {
         "properties": {
@@ -267,6 +332,11 @@
         "type": "object",
         "required": ["prompt"],
         "title": "ImageGenRequest"
+      },
+      "TextureResolutionEnum": {
+        "type": "string",
+        "enum": ["1024", "2048", "512"],
+        "title": "TextureResolutionEnum"
       },
       "ValidationError": {
         "properties": {

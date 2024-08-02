@@ -1,0 +1,163 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "InstantAPI Retrieve API",
+    "version": "1.0.0",
+    "description": "API for retrieving data from web pages using AI-powered scraping"
+  },
+  "servers": [
+    {
+      "url": "https://instantapi.ai/api"
+    }
+  ],
+  "paths": {
+    "/retrieve": {
+      "get": {
+        "summary": "Retrieve data from a web page (GET)",
+        "operationId": "retrieveDataGet",
+        "parameters": [
+          {
+            "name": "webpage_url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The URL of the web page to be scrapped",
+            "example": "https://example.com"
+          },
+          {
+            "name": "api_method_name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "A user-defined name for the API action",
+            "example": "getUserData"
+          },
+          {
+            "name": "api_parameters",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Additional user-defined parameters for the API method, in JSON format",
+            "example": "{\"user_id\": \"12345\"}"
+          },
+          {
+            "name": "api_response_structure",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The expected structure of the API's response",
+            "example": "{\"response\": {\"name\": \"<the name of the user>\", \"email\": \"<the email address of the user>\"}}"
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Specifies the country code for using a premium proxy",
+            "example": "us"
+          },
+          {
+            "name": "verbose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "If true, the response will include the full HTML content of the scraped webpage",
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Retrieve data from a web page (POST)",
+        "operationId": "retrieveDataPost",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "webpage_url": {
+                    "type": "string",
+                    "description": "The URL of the web page to be scrapped",
+                    "example": "https://example.com"
+                  },
+                  "api_method_name": {
+                    "type": "string",
+                    "description": "A user-defined name for the API action",
+                    "example": "getUserData"
+                  },
+                  "api_parameters": {
+                    "type": "string",
+                    "description": "Additional user-defined parameters for the API method",
+                    "example": { "user_id": "12345" }
+                  },
+                  "api_response_structure": {
+                    "type": "string",
+                    "description": "The expected structure of the API's response",
+                    "example": {
+                      "response": {
+                        "name": "<the name of the user>",
+                        "email": "<the email address of the user>"
+                      }
+                    }
+                  },
+                  "country_code": {
+                    "type": "string",
+                    "description": "Specifies the country code for using a premium proxy",
+                    "example": "us"
+                  },
+                  "verbose": {
+                    "type": "boolean",
+                    "description": "If true, the response will include the full HTML content of the scraped webpage",
+                    "example": true
+                  }
+                },
+                "required": [
+                  "webpage_url",
+                  "api_method_name",
+                  "api_response_structure"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
