@@ -1,10 +1,6 @@
-pandas
-numpy
-nixtla
 uvicorn
 fastapi
 pydantic
 ouro-py
 python-dotenv
-autots
-tabulate
+requests
