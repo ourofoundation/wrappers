@@ -4,118 +4,38 @@ import base64
 import json
 import os
 import re
+import uuid
 from enum import Enum
+from io import BytesIO
 from typing import List, Optional
 
 import requests
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
+from lib.polling import poll_generation
+from lib.schema import (
+    ControlRequest,
+    Fast3DRequest,
+    ImageGenRequest,
+    ImageToVideoRequest,
+)
 from ouro.utils import get_custom_openapi, ouro_field
-from pydantic import BaseModel, Field
+from PIL import Image
 
 from ouro import Ouro
 
 load_dotenv()  # take environment variables from .env.
 
 
-class AspectRatioEnum(str, Enum):
-    square = "1:1"
-    ratio_16_9 = "16:9"
-    ratio_21_9 = "21:9"
-    ratio_2_3 = "2:3"
-    ratio_3_2 = "3:2"
-    ratio_4_5 = "4:5"
-    ratio_5_4 = "5:4"
-    ratio_9_16 = "9:16"
-    ratio_9_21 = "9:21"
-
-
-class TextureResolutionEnum(str, Enum):
-    res_1024 = 1024
-    res_2048 = 2048
-    res_512 = 512
-
-
-class ImageGenRequest(BaseModel):
-    prompt: str = Field(
-        ...,
-        title="Prompt",
-        description="What you wish to see in the output image. A strong, descriptive prompt that clearly defines elements, colors, and subjects will lead to better results.",
-    )
-    negative_prompt: Optional[str] = Field(
-        None,
-        title="Negative Prompt",
-        description="A blurb of text describing what you do not wish to see in the output image.",
-    )
-    aspect_ratio: AspectRatioEnum = Field(
-        "1:1",
-        title="Aspect Ratio",
-        description="Controls the aspect ratio of the generated image.",
-    )
-    # output_format: str = Field(
-    #     "png",
-    #     title="Output Format",
-    #     description="Dictates the content-type of the generated image.",
-    # )
-
-
-class File(BaseModel):
-    id: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    url: str
-    filename: str
-    type: str
-
-
-class ControlRequest(BaseModel):
-    file: File
-    prompt: str = Field(
-        ...,
-        title="Prompt",
-        description="What you wish to see in the output image. A strong, descriptive prompt that clearly defines elements, colors, and subjects will lead to better results.",
-    )
-    control_strength: float = Field(
-        0.7,
-        title="Control Strength",
-        description="How much influence, or control, the image has on the generation. Represented as a float between 0 and 1, where 0 is the least influence and 1 is the maximum.",
-        ge=0,
-        le=1,
-    )
-    negative_prompt: Optional[str] = Field(
-        None,
-        title="Negative Prompt",
-        description="A blurb of text describing what you do not wish to see in the output image.",
-    )
-    # output_format: str = Field(
-    #     "png",
-    #     title="Output Format",
-    #     description="Dictates the content-type of the generated image.",
-    # )
-
-
-class Fast3DRequest(BaseModel):
-    file: File
-    texture_resolution: TextureResolutionEnum = Field(
-        1024,
-        title="Texture Resolution",
-        description="Determines the resolution of the textures used for both the albedo (color) map and the normal map.",
-    )
-    foreground_ratio: float = Field(
-        0.85,
-        title="Foreground Ratio",
-        description="Controls the amount of padding around the object to be processed within the frame. A higher ratio means less padding and a larger object, while a lower ratio increases the padding.",
-        ge=0,
-        le=1,
-    )
+STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY")
 
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="StabilityAI API",
+    title="StabilityAI REST API",
     version="v2beta",
     description="",
     servers=[
@@ -155,15 +75,12 @@ app.add_middleware(
 )
 @ouro_field("x-ouro-output-asset-type", "file")
 @ouro_field("x-ouro-output-asset-filter", "image")
-async def generate_with_ultra(
-    body: ImageGenRequest, authorization: str | None = Header(default=None)
-):
+async def generate_with_ultra(body: ImageGenRequest):
     try:
-        api_key = authorization.split(" ")[1] if authorization else None
         response = requests.post(
             f"https://api.stability.ai/v2beta/stable-image/generate/ultra",
             headers={
-                "authorization": f"Bearer {api_key}",
+                "authorization": f"Bearer {STABILITY_API_KEY}",
                 "accept": "application/json",
             },
             files={"none": ""},
@@ -204,15 +121,12 @@ async def generate_with_ultra(
 )
 @ouro_field("x-ouro-output-asset-type", "file")
 @ouro_field("x-ouro-output-asset-filter", "image")
-async def generate_with_core(
-    body: ImageGenRequest, authorization: str | None = Header(default=None)
-):
+async def generate_with_core(body: ImageGenRequest):
     try:
-        api_key = authorization.split(" ")[1] if authorization else None
         response = requests.post(
             f"https://api.stability.ai/v2beta/stable-image/generate/core",
             headers={
-                "authorization": f"Bearer {api_key}",
+                "authorization": f"Bearer {STABILITY_API_KEY}",
                 "accept": "application/json",
             },
             files={"none": ""},
@@ -253,15 +167,12 @@ async def generate_with_core(
 )
 @ouro_field("x-ouro-output-asset-type", "file")
 @ouro_field("x-ouro-output-asset-filter", "image")
-async def generate_with_sd3(
-    body: ImageGenRequest, authorization: str | None = Header(default=None)
-):
+async def generate_with_sd3(body: ImageGenRequest):
     try:
-        api_key = authorization.split(" ")[1] if authorization else None
         response = requests.post(
             f"https://api.stability.ai/v2beta/stable-image/generate/sd3",
             headers={
-                "authorization": f"Bearer {api_key}",
+                "authorization": f"Bearer {STABILITY_API_KEY}",
                 "accept": "application/json",
             },
             files={"none": ""},
@@ -304,20 +215,17 @@ async def generate_with_sd3(
 @ouro_field("x-ouro-input-asset-filter", "image")
 @ouro_field("x-ouro-output-asset-type", "file")
 @ouro_field("x-ouro-output-asset-filter", "image")
-async def control_with_sketch(
-    body: ControlRequest, authorization: str | None = Header(default=None)
-):
+async def control_with_sketch(body: ControlRequest):
     try:
         # Read the image file and pass it directly to next request
         file_response = requests.get(body.file.url)
         if file_response.status_code != 200:
             raise Exception("Failed to read the image file.")
 
-        api_key = authorization.split(" ")[1] if authorization else None
         response = requests.post(
             f"https://api.stability.ai/v2beta/stable-image/control/sketch",
             headers={
-                "authorization": f"Bearer {api_key}",
+                "authorization": f"Bearer {STABILITY_API_KEY}",
                 "accept": "application/json",
             },
             files={"image": file_response.content},
@@ -356,25 +264,23 @@ async def control_with_sketch(
 @app.post(
     "/3d/stable-fast-3d",
     summary="Generate 3D assets from a single 2D input image",
+    description="Stable Fast 3D generates high-quality 3D assets from a single 2D input image.",
 )
 @ouro_field("x-ouro-input-asset-type", "file")
 @ouro_field("x-ouro-input-asset-filter", "image")
 @ouro_field("x-ouro-output-asset-type", "file")
 @ouro_field("x-ouro-output-asset-filter", "3d")
-async def fast_3d(
-    body: Fast3DRequest, authorization: str | None = Header(default=None)
-):
+async def fast_3d(body: Fast3DRequest):
     try:
         # Read the image file and pass it directly to next request
         file_response = requests.get(body.file.url)
         if file_response.status_code != 200:
             raise Exception("Failed to read the image file.")
 
-        api_key = authorization.split(" ")[1] if authorization else None
         response = requests.post(
             f"https://api.stability.ai/v2beta/3d/stable-fast-3d",
             headers={
-                "authorization": f"Bearer {api_key}",
+                "authorization": f"Bearer {STABILITY_API_KEY}",
                 "accept": "application/json",
             },
             files={"image": file_response.content},
@@ -400,6 +306,98 @@ async def fast_3d(
                 "extension": "glb",
             }
         }
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post(
+    "/image-to-video",
+    summary="Generate a short video based on an initial image",
+    description="Generate a short video based on an initial image with Stable Video Diffusion, a latent video diffusion model.",
+)
+@ouro_field("x-ouro-input-asset-type", "file")
+@ouro_field("x-ouro-input-asset-filter", "image")
+@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field("x-ouro-output-asset-filter", "video")
+@ouro_field("x-ouro-output-async", "true")  # or return 202
+# Flat rate of 20 credits per successful generation
+async def image_to_video(
+    body: ImageToVideoRequest,
+    background_tasks: BackgroundTasks,
+    # Get user id from ouro-user-id header
+    ouro_user_id: str = Header(None),
+):
+    try:
+        # Read the image file and pass it directly to next request
+        file_response = requests.get(body.file.url)
+        if file_response.status_code != 200:
+            raise Exception("Failed to read the image file.")
+
+        # Convert image to PNG format and handle resizing
+        image = Image.open(BytesIO(file_response.content))
+        # If square and greater than 768x768, resize to 768x768
+        if image.width == image.height and image.width > 768:
+            image = image.resize((768, 768), Image.Resampling.LANCZOS)
+        # Always save as PNG with consistent settings
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format="PNG", optimize=True)
+        content = img_byte_arr.getvalue()
+
+        # Send the image to the Stability API
+        # response = requests.post(
+        #     f"https://api.stability.ai/v2beta/image-to-video",
+        #     headers={
+        #         "authorization": f"Bearer {STABILITY_API_KEY}",
+        #         "accept": "application/json",
+        #     },
+        #     files={"image": content},
+        #     data={
+        #         "seed": body.seed,
+        #     },
+        # )
+        # if response.status_code != 200:
+        #     raise Exception(str(response.json()["errors"]))
+
+        generation_id = (
+            "020f5537a41247ea5127d3c04098d12e0dd4495135e8f9ca4b47c3b792bec2c3"
+        )
+        # response.json().get("id")
+        print(f"Generation ID: {generation_id}")
+        file_name = f"{body.file.name}.mp4"
+
+        # Create partial file to later update with the generation
+        ouro = Ouro(api_key=os.environ.get("OURO_API_KEY"))
+        partial_file = ouro.files.create(
+            name=file_name,
+            visibility="public",
+            metadata={"type": "video/mp4"},
+            state="in-progress",
+        )
+
+        # # Start up a background_task to check the status of the video generation
+        background_tasks.add_task(
+            poll_generation,
+            generation_id,
+            partial_file,
+            ouro_user_id,
+        )
+
+        # Return to the user and tell them the video will be ready soon
+        return Response(
+            content=json.dumps(
+                {
+                    "message": "Video generation has been queued. The video will be shared with you soon.",
+                    # "generation_id": generation_id,
+                    "status": "pending",
+                    "estimatedTime": "30 seconds",
+                    "file": partial_file.model_dump(mode="json"),
+                }
+            ),
+            media_type="application/json",
+            status_code=status.HTTP_202_ACCEPTED,
+        )
 
     except Exception as e:
         print(e)

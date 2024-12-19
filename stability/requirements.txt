@@ -4,3 +4,4 @@ pydantic
 ouro-py
 python-dotenv
 requests
+pillow
