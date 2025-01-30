@@ -3,16 +3,20 @@
 import base64
 import json
 import os
-import re
-import uuid
-from enum import Enum
 from io import BytesIO
-from typing import List, Optional
 
 import requests
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Response, status
+from fastapi import (
+    BackgroundTasks,
+    FastAPI,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    status,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from lib.polling import poll_generation
@@ -24,13 +28,42 @@ from lib.schema import (
 )
 from ouro.utils import get_custom_openapi, ouro_field
 from PIL import Image
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp
 
 from ouro import Ouro
 
 load_dotenv()  # take environment variables from .env.
 
-
 STABILITY_API_KEY = os.environ.get("STABILITY_API_KEY")
+
+
+class BasicAuthMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app: ASGIApp, token: str):
+        super().__init__(app)
+        self.token = token or None
+
+    async def dispatch(self, request: Request, call_next):
+        auth_header = request.headers.get("Authorization")
+        if not auth_header:
+            raise HTTPException(status_code=401, detail="Authorization header missing")
+
+        try:
+            scheme, credentials = auth_header.split()
+            print("Got credentials:", credentials)
+            if scheme.lower() != "basic":
+                raise HTTPException(
+                    status_code=401, detail="Invalid authentication scheme"
+                )
+            if credentials != self.token:
+                raise HTTPException(
+                    status_code=401, detail="Invalid Ouro service credentials"
+                )
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid authorization header")
+        return await call_next(request)
+
+
 
 
 # Initialize FastAPI app
@@ -67,6 +100,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+if os.environ.get("PYTHON_ENV") != "development":
+    app.add_middleware(BasicAuthMiddleware, token=os.environ.get("OURO_SERVICE_TOKEN") or "")
 
 
 @app.post(
@@ -314,14 +349,13 @@ async def fast_3d(body: Fast3DRequest):
 
 @app.post(
     "/image-to-video",
-    summary="Generate a short video based on an initial image",
+    summary="Generate a short video from an image",
     description="Generate a short video based on an initial image with Stable Video Diffusion, a latent video diffusion model.",
 )
 @ouro_field("x-ouro-input-asset-type", "file")
 @ouro_field("x-ouro-input-asset-filter", "image")
 @ouro_field("x-ouro-output-asset-type", "file")
 @ouro_field("x-ouro-output-asset-filter", "video")
-@ouro_field("x-ouro-output-async", "true")  # or return 202
 # Flat rate of 20 credits per successful generation
 async def image_to_video(
     body: ImageToVideoRequest,
@@ -346,25 +380,21 @@ async def image_to_video(
         content = img_byte_arr.getvalue()
 
         # Send the image to the Stability API
-        # response = requests.post(
-        #     f"https://api.stability.ai/v2beta/image-to-video",
-        #     headers={
-        #         "authorization": f"Bearer {STABILITY_API_KEY}",
-        #         "accept": "application/json",
-        #     },
-        #     files={"image": content},
-        #     data={
-        #         "seed": body.seed,
-        #     },
-        # )
-        # if response.status_code != 200:
-        #     raise Exception(str(response.json()["errors"]))
-
-        generation_id = (
-            "020f5537a41247ea5127d3c04098d12e0dd4495135e8f9ca4b47c3b792bec2c3"
+        response = requests.post(
+            f"https://api.stability.ai/v2beta/image-to-video",
+            headers={
+                "authorization": f"Bearer {STABILITY_API_KEY}",
+                "accept": "application/json",
+            },
+            files={"image": content},
+            data={
+                "seed": body.seed,
+            },
         )
-        # response.json().get("id")
-        print(f"Generation ID: {generation_id}")
+        if response.status_code != 200:
+            raise Exception(str(response.json()["errors"]))
+
+        generation_id = response.json().get("id")
         file_name = f"{body.file.name}.mp4"
 
         # Create partial file to later update with the generation
@@ -376,7 +406,11 @@ async def image_to_video(
             state="in-progress",
         )
 
-        # # Start up a background_task to check the status of the video generation
+        # Share with requesting user
+        partial_file.share(ouro_user_id, "admin")
+        # TODO: transfer ownership of the file to the user
+
+        # Start up a background_task to check the status of the video generation
         background_tasks.add_task(
             poll_generation,
             generation_id,

@@ -1,0 +1,384 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenAI API",
+    "description": "OpenAI REST API provides a simple interface to state-of-the-art AI models for natural language processing, image generation, semantic search, and speech recognition.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/images/generations/dalle3": {
+      "post": {
+        "summary": "Text to image generation with DALL-E 3",
+        "operationId": "generate_with_dalle3_images_generations_dalle3_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Dalle3ImageGenRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-filter": "image",
+        "x-ouro-output-asset-type": "file"
+      }
+    },
+    "/images/generations/dalle2": {
+      "post": {
+        "summary": "Text to image generation with DALL-E 2",
+        "operationId": "generate_with_dalle2_images_generations_dalle2_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Dalle2ImageGenRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-filter": "image",
+        "x-ouro-output-asset-type": "file"
+      }
+    },
+    "/images/variations": {
+      "post": {
+        "summary": "Create variations of an existing image",
+        "operationId": "create_variation_images_variations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ImageVariationRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-filter": "image",
+        "x-ouro-output-asset-type": "file",
+        "x-ouro-input-asset-filter": "image",
+        "x-ouro-input-asset-type": "file"
+      }
+    },
+    "/images/analyze": {
+      "post": {
+        "summary": "Use vision capabilities to understand images",
+        "operationId": "analyze_image_images_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ImageAnalysisRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-input-asset-filter": "image",
+        "x-ouro-input-asset-type": "file"
+      }
+    },
+    "/speech/generate": {
+      "post": {
+        "summary": "Convert text to speech using OpenAI TTS",
+        "operationId": "generate_speech_speech_generate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TextToSpeechRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-filter": "audio",
+        "x-ouro-output-asset-type": "file"
+      }
+    },
+    "/speech/from-post": {
+      "post": {
+        "summary": "Convert a post to speech using OpenAI TTS",
+        "operationId": "generate_speech_from_post_speech_from_post_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PostToSpeechRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-filter": "audio",
+        "x-ouro-output-asset-type": "file",
+        "x-ouro-input-asset-type": "post"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Dalle2ImageGenRequest": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt to generate the image from."
+          },
+          "size": {
+            "$ref": "#/components/schemas/Dalle2SizeEnum",
+            "title": "Resolution",
+            "description": "Controls the resolution of the generated image.",
+            "default": "1024x1024"
+          }
+        },
+        "type": "object",
+        "required": ["prompt"],
+        "title": "Dalle2ImageGenRequest"
+      },
+      "Dalle2SizeEnum": {
+        "type": "string",
+        "enum": ["256x256", "512x512", "1024x1024"],
+        "title": "Dalle2SizeEnum"
+      },
+      "Dalle3ImageGenRequest": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt to generate the image from."
+          },
+          "size": {
+            "$ref": "#/components/schemas/Dalle3SizeEnum",
+            "title": "Resolution",
+            "description": "Controls the resolution of the generated image.",
+            "default": "1024x1024"
+          }
+        },
+        "type": "object",
+        "required": ["prompt"],
+        "title": "Dalle3ImageGenRequest"
+      },
+      "Dalle3SizeEnum": {
+        "type": "string",
+        "enum": ["1024x1024", "1024x1792", "1792x1024"],
+        "title": "Dalle3SizeEnum"
+      },
+      "FileInfo": {
+        "properties": {
+          "url": { "type": "string", "title": "Url" },
+          "name": { "type": "string", "title": "Name" }
+        },
+        "type": "object",
+        "required": ["url", "name"],
+        "title": "FileInfo"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImageAnalysisRequest": {
+        "properties": {
+          "file": { "$ref": "#/components/schemas/FileInfo" },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The question or prompt about the image you want to analyze."
+          },
+          "max_tokens": {
+            "type": "integer",
+            "title": "Max Tokens",
+            "description": "The maximum number of tokens to generate in the response.",
+            "default": 300
+          }
+        },
+        "type": "object",
+        "required": ["file", "prompt"],
+        "title": "ImageAnalysisRequest"
+      },
+      "ImageVariationRequest": {
+        "properties": { "file": { "$ref": "#/components/schemas/FileInfo" } },
+        "type": "object",
+        "required": ["file"],
+        "title": "ImageVariationRequest"
+      },
+      "Post": {
+        "properties": {
+          "id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Name"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "title": "Post"
+      },
+      "PostToSpeechRequest": {
+        "properties": {
+          "post": {
+            "$ref": "#/components/schemas/Post",
+            "description": "The post to convert to speech"
+          },
+          "voice": {
+            "$ref": "#/components/schemas/VoiceEnum",
+            "title": "Voice",
+            "description": "The voice to use for the speech",
+            "default": "alloy"
+          },
+          "model": {
+            "$ref": "#/components/schemas/VoiceModelEnum",
+            "title": "Model",
+            "description": "The TTS model to use",
+            "default": "tts-1"
+          }
+        },
+        "type": "object",
+        "required": ["post"],
+        "title": "PostToSpeechRequest"
+      },
+      "TextToSpeechRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The text to convert to speech"
+          },
+          "voice": {
+            "$ref": "#/components/schemas/VoiceEnum",
+            "title": "Voice",
+            "description": "The voice to use for the speech",
+            "default": "alloy"
+          },
+          "model": {
+            "$ref": "#/components/schemas/VoiceModelEnum",
+            "title": "Model",
+            "description": "The TTS model to use",
+            "default": "tts-1"
+          }
+        },
+        "type": "object",
+        "required": ["text"],
+        "title": "TextToSpeechRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      },
+      "VoiceEnum": {
+        "type": "string",
+        "enum": [
+          "alloy",
+          "ash",
+          "coral",
+          "echo",
+          "fable",
+          "onyx",
+          "nova",
+          "sage",
+          "shimmer"
+        ],
+        "title": "VoiceEnum"
+      },
+      "VoiceModelEnum": {
+        "type": "string",
+        "enum": ["tts-1", "tts-1-hd"],
+        "title": "VoiceModelEnum"
+      }
+    }
+  }
+}
