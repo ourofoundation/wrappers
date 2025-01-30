@@ -28,7 +28,7 @@ class Dalle3ImageGenRequest(BaseModel):
         description="The text prompt to generate the image from.",
     )
     size: Dalle3SizeEnum = Field(
-        "1024x1024",
+        Dalle3SizeEnum.square,
         title="Resolution",
         description="Controls the resolution of the generated image.",
     )
@@ -41,7 +41,7 @@ class Dalle2ImageGenRequest(BaseModel):
         description="The text prompt to generate the image from.",
     )
     size: Dalle2SizeEnum = Field(
-        "1024x1024",
+        Dalle2SizeEnum.square_large,
         title="Resolution",
         description="Controls the resolution of the generated image.",
     )
