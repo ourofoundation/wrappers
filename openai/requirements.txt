@@ -4,3 +4,5 @@ pydantic
 ouro-py
 python-dotenv
 requests
+openai
+pillow
