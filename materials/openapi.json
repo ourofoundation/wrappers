@@ -1,0 +1,178 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Materials API",
+    "summary": "Relax crystal structures using ML interatomic potentials",
+    "description": "API for relaxing crystal structures using machine learning interatomic potentials like Orb.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/materials": {
+      "get": {
+        "summary": "Welcome",
+        "operationId": "welcome_materials_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/materials/structure/relax": {
+      "post": {
+        "summary": "Relax a crystal structure",
+        "description": "Optimize a crystal structure using machine learning interatomic potentials",
+        "operationId": "relax_materials_structure_relax_post",
+        "parameters": [
+          {
+            "name": "ouro-route-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Id"
+            }
+          },
+          {
+            "name": "ouro-route-org-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Org-Id"
+            }
+          },
+          {
+            "name": "ouro-route-team-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Team-Id"
+            }
+          },
+          {
+            "name": "ouro-action-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Action-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RelaxStructureRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-type": "file",
+        "x-ouro-input-file-extension": "cif",
+        "x-ouro-input-asset-type": "file"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "File": {
+        "properties": {
+          "url": { "type": "string", "title": "Url" },
+          "filename": { "type": "string", "title": "Filename" },
+          "name": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Description"
+          },
+          "id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Id"
+          },
+          "type": { "type": "string", "title": "Type" },
+          "org_id": { "type": "string", "title": "Org Id" },
+          "team_id": { "type": "string", "title": "Team Id" },
+          "visibility": { "type": "string", "title": "Visibility" }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "filename",
+          "type",
+          "org_id",
+          "team_id",
+          "visibility"
+        ],
+        "title": "File"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RelaxStructureRequest": {
+        "properties": {
+          "file": { "$ref": "#/components/schemas/File" },
+          "fmax": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Fmax",
+            "description": "Force convergence (eV/Å)",
+            "default": 0.03
+          },
+          "max_steps": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Max Steps",
+            "description": "Maximum optimization steps",
+            "default": 400
+          }
+        },
+        "type": "object",
+        "required": ["file"],
+        "title": "RelaxStructureRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

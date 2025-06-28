@@ -1,0 +1,249 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MatterGen",
+    "summary": "Generate crystal structures with MatterGen",
+    "description": "MatterGen is a generative model for inorganic materials design that can be fine-tuned to steer the generation towards a wide range of property constraints.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/mattergen": {
+      "get": {
+        "summary": "Welcome",
+        "operationId": "welcome_mattergen_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/mattergen/generate": {
+      "post": {
+        "summary": "Generate crystal structures with chemical system conditioning",
+        "description": "Generate crystal structures conditioned on a chemical system using MatterGen",
+        "operationId": "generate_chemical_system_mattergen_generate_post",
+        "parameters": [
+          {
+            "name": "ouro-route-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Id"
+            }
+          },
+          {
+            "name": "ouro-route-org-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Org-Id"
+            }
+          },
+          {
+            "name": "ouro-route-team-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Team-Id"
+            }
+          },
+          {
+            "name": "ouro-action-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Action-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChemicalSystemRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-type": "file"
+      }
+    },
+    "/mattergen/generate/magnetic-density": {
+      "post": {
+        "summary": "Generate crystal structures with magnetic density conditioning",
+        "description": "Generate crystal structures conditioned on magnetic density using MatterGen",
+        "operationId": "generate_magnetic_density_mattergen_generate_magnetic_density_post",
+        "parameters": [
+          {
+            "name": "ouro-route-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Id"
+            }
+          },
+          {
+            "name": "ouro-route-org-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Org-Id"
+            }
+          },
+          {
+            "name": "ouro-route-team-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Route-Team-Id"
+            }
+          },
+          {
+            "name": "ouro-action-id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Ouro-Action-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MagneticDensityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-type": "file"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChemicalSystemRequest": {
+        "properties": {
+          "batch_size": {
+            "type": "integer",
+            "maximum": 64.0,
+            "minimum": 1.0,
+            "title": "Batch Size",
+            "description": "Number of structures to generate in each batch",
+            "default": 16
+          },
+          "guidance_factor": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Guidance Factor",
+            "description": "Diffusion guidance factor. Higher values produce samples that better match the target property but may be less realistic.",
+            "default": 2.0
+          },
+          "chemical_system": {
+            "type": "string",
+            "title": "Chemical System",
+            "description": "Chemical system to generate (e.g., 'Li-O' or 'Fe-Co-Ni')"
+          }
+        },
+        "type": "object",
+        "required": ["chemical_system"],
+        "title": "ChemicalSystemRequest",
+        "description": "Request model for chemical system generation."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MagneticDensityRequest": {
+        "properties": {
+          "batch_size": {
+            "type": "integer",
+            "maximum": 64.0,
+            "minimum": 1.0,
+            "title": "Batch Size",
+            "description": "Number of structures to generate in each batch",
+            "default": 16
+          },
+          "guidance_factor": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Guidance Factor",
+            "description": "Diffusion guidance factor. Higher values produce samples that better match the target property but may be less realistic.",
+            "default": 2.0
+          },
+          "magnetic_density": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Magnetic Density",
+            "description": "Target magnetic density value in units of Angstrom^-3"
+          }
+        },
+        "type": "object",
+        "required": ["magnetic_density"],
+        "title": "MagneticDensityRequest",
+        "description": "Request model for magnetic density generation."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

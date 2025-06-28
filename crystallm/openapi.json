@@ -1,0 +1,326 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CrystaLLM",
+    "summary": "Generate crystal structures with CrystaLLM",
+    "description": "CrystaLLM is a model that generates crystal structures from chemical compositions.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Welcome",
+        "operationId": "welcome__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/generate": {
+      "post": {
+        "summary": "Generate a crystal structure with CrystaLLM",
+        "description": "Generate a crystal structure with CrystaLLM",
+        "operationId": "generate_generate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GenerationRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "x-ouro-output-asset-type": "file"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GenerationRequest": {
+        "properties": {
+          "composition": {
+            "type": "string",
+            "title": "Composition",
+            "description": "Chemical composition (e.g., 'PbTe' or 'Bi2Se3')"
+          },
+          "space_group": {
+            "anyOf": [
+              { "$ref": "#/components/schemas/SpaceGroup" },
+              { "type": "null" }
+            ],
+            "description": "Space group symbol (e.g., 'Fd3m', 'P4_2/n', etc.)"
+          },
+          "max_new_tokens": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Max New Tokens",
+            "description": "Number of tokens generated in each sample",
+            "default": 3000
+          },
+          "temperature": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.1,
+            "title": "Temperature",
+            "description": "Sampling temperature. 1.0 = no change, < 1.0 = less random, > 1.0 = more random",
+            "default": 0.8
+          }
+        },
+        "type": "object",
+        "required": ["composition"],
+        "title": "GenerationRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "SpaceGroup": {
+        "type": "string",
+        "enum": [
+          "P1",
+          "P-1",
+          "P2",
+          "P2_1",
+          "C2",
+          "Pm",
+          "Pc",
+          "Cm",
+          "Cc",
+          "P2/m",
+          "P2_1/m",
+          "C2/m",
+          "P2/c",
+          "P2_1/c",
+          "C2/c",
+          "P222",
+          "P222_1",
+          "P2_12_12",
+          "P2_12_12_1",
+          "C222",
+          "C222_1",
+          "F222",
+          "I222",
+          "I2_12_12_1",
+          "Pmm2",
+          "Pcc2",
+          "Pma2",
+          "Pca2_1",
+          "Pnc2",
+          "Pmn2_1",
+          "Pba2",
+          "Pna2_1",
+          "Cmm2",
+          "Ccc2",
+          "Amm2",
+          "Abm2",
+          "Ama2",
+          "Aba2",
+          "Pmmm",
+          "Pnnn",
+          "Pccm",
+          "Pban",
+          "Pmma",
+          "Pnna",
+          "Pmna",
+          "Pcca",
+          "Pbam",
+          "Pccn",
+          "Pbcm",
+          "Pnnm",
+          "Pmmn",
+          "Pbcn",
+          "Pbca",
+          "Pnma",
+          "Cmcm",
+          "Cmca",
+          "Cmmm",
+          "Cccm",
+          "Cmma",
+          "Ccca",
+          "Fmmm",
+          "Fddd",
+          "Immm",
+          "Ibam",
+          "Ibca",
+          "Imma",
+          "P4",
+          "P4_1",
+          "P4_2",
+          "P4_3",
+          "I4",
+          "I4_1",
+          "P4/m",
+          "P4_2/m",
+          "P4/n",
+          "P4_2/n",
+          "I4/m",
+          "I4_1/a",
+          "P422",
+          "P42_12",
+          "P4_122",
+          "P4_12_12",
+          "P4_222",
+          "P4_22_12",
+          "P4_322",
+          "P4_32_12",
+          "I422",
+          "I4_122",
+          "P4mm",
+          "P4bm",
+          "P4_2cm",
+          "P4_2nm",
+          "P4cc",
+          "P4nc",
+          "P4_2mc",
+          "P4_2bc",
+          "I4mm",
+          "I4cm",
+          "I4_1md",
+          "I4_1cd",
+          "P4/mmm",
+          "P4/mcc",
+          "P4/nbm",
+          "P4/nnc",
+          "P4/mbm",
+          "P4/mnc",
+          "P4/nmm",
+          "P4/ncc",
+          "P4_2/mmc",
+          "P4_2/mcm",
+          "P4_2/nbc",
+          "P4_2/nnm",
+          "P4_2/mbc",
+          "P4_2/mnm",
+          "P4_2/nmc",
+          "P4_2/ncm",
+          "I4/mmm",
+          "I4/mcm",
+          "I4_1/amd",
+          "I4_1/acd",
+          "P3",
+          "P3_1",
+          "P3_2",
+          "R3",
+          "P-3",
+          "R-3",
+          "P312",
+          "P321",
+          "P3_112",
+          "P3_121",
+          "P3_212",
+          "P3_221",
+          "R32",
+          "P3m1",
+          "P31m",
+          "P3c1",
+          "P31c",
+          "R3m",
+          "R3c",
+          "P-31m",
+          "P-3m1",
+          "P-31c",
+          "P-3c1",
+          "R-3m",
+          "R-3c",
+          "P6",
+          "P6_1",
+          "P6_5",
+          "P6_2",
+          "P6_4",
+          "P6_3",
+          "P6/m",
+          "P6_3/m",
+          "P622",
+          "P6_122",
+          "P6_522",
+          "P6_222",
+          "P6_422",
+          "P6_322",
+          "P6mm",
+          "P6cc",
+          "P6_3cm",
+          "P6_3mc",
+          "P6/mmm",
+          "P6/mcc",
+          "P6_3/mcm",
+          "P6_3/mmc",
+          "P23",
+          "F23",
+          "I23",
+          "P2_13",
+          "I2_13",
+          "Pm3",
+          "Pn3",
+          "Fm3",
+          "Fd3",
+          "Im3",
+          "Pa3",
+          "Ia3",
+          "P432",
+          "P4_232",
+          "F432",
+          "F4_132",
+          "I432",
+          "P4_332",
+          "P4_132",
+          "I4_132",
+          "P4_3m",
+          "F4_3m",
+          "I4_3m",
+          "P4_3n",
+          "F4_3c",
+          "I4_3d",
+          "Pm3m",
+          "Pn3n",
+          "Pm3n",
+          "Pn3m",
+          "Fm3m",
+          "Fm3c",
+          "Fd3m",
+          "Fd3c",
+          "Im3m",
+          "Ia3d"
+        ],
+        "title": "SpaceGroup"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
