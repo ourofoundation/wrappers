@@ -82,7 +82,10 @@ app.add_middleware(
 
 @app.post("/forecast", summary="Generate a forecast using the TimeGPT model")
 @ouro_field("x-ouro-input-asset-type", "dataset")
-@ouro_field("x-ouro-output-asset-type", "dataset")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"dataset": {"asset_type": "dataset", "primary": True}},
+)
 async def forecast(
     body: ForecastRequest, authorization: str | None = Header(default=None)
 ):
@@ -140,7 +143,10 @@ async def forecast(
     summary="Generate a forecast report with the TimeGPT model",
 )
 @ouro_field("x-ouro-input-asset-type", "dataset")
-@ouro_field("x-ouro-output-asset-type", "post")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"post": {"asset_type": "post", "primary": True}},
+)
 async def forecast_report(
     body: ForecastRequest, authorization: str | None = Header(default=None)
 ):
@@ -227,7 +233,7 @@ async def forecast_report(
         post.new_inline_asset(
             id=saved_forecast["id"],
             asset_type="dataset",
-            view_mode="chart",
+            view_mode="preview",
         )
         post.new_code_block(
             f"SELECT * FROM datasets.{saved_forecast['metadata']['table_name']}",

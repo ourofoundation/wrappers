@@ -64,7 +64,7 @@ app.add_middleware(
     "/dream-machine/generate/text-to-video",
     summary="Text to video generation with Dream Machine",
 )
-# @ouro_field("x-ouro-output-asset-type", "file")
+# @ouro_field("x-ouro-output-assets", {"file": {"asset_type": "file", "primary": True}})
 # @ouro_field("x-ouro-output-asset-filter", "video")
 async def generate_video(
     request: VideoGenRequest,

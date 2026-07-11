@@ -108,7 +108,10 @@ if os.environ.get("PYTHON_ENV") != "development":
     "/stable-image/generate/ultra",
     summary="Text to image generation with Stable Image Ultra",
 )
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "image")
 async def generate_with_ultra(body: ImageGenRequest):
     try:
@@ -154,7 +157,10 @@ async def generate_with_ultra(body: ImageGenRequest):
     "/stable-image/generate/core",
     summary="Text to image generation with Stable Image Core",
 )
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "image")
 async def generate_with_core(body: ImageGenRequest):
     try:
@@ -200,7 +206,10 @@ async def generate_with_core(body: ImageGenRequest):
     "/stable-image/generate/sd3",
     summary="Text to image generation with Stable Diffusion 3.0",
 )
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "image")
 async def generate_with_sd3(body: ImageGenRequest):
     try:
@@ -248,7 +257,10 @@ async def generate_with_sd3(body: ImageGenRequest):
 )
 @ouro_field("x-ouro-input-asset-type", "file")
 @ouro_field("x-ouro-input-asset-filter", "image")
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "image")
 async def control_with_sketch(body: ControlRequest):
     try:
@@ -303,7 +315,10 @@ async def control_with_sketch(body: ControlRequest):
 )
 @ouro_field("x-ouro-input-asset-type", "file")
 @ouro_field("x-ouro-input-asset-filter", "image")
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "3d")
 async def fast_3d(body: Fast3DRequest):
     try:
@@ -354,7 +369,10 @@ async def fast_3d(body: Fast3DRequest):
 )
 @ouro_field("x-ouro-input-asset-type", "file")
 @ouro_field("x-ouro-input-asset-filter", "image")
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "video")
 # Flat rate of 20 credits per successful generation
 async def image_to_video(

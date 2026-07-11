@@ -95,7 +95,10 @@ if os.environ.get("PYTHON_ENV") != "development":
     "/images/generations/dalle3",
     summary="Text to image generation with DALL-E 3",
 )
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "image")
 async def generate_with_dalle3(body: Dalle3ImageGenRequest):
     try:
@@ -133,7 +136,10 @@ async def generate_with_dalle3(body: Dalle3ImageGenRequest):
     "/images/generations/dalle2",
     summary="Text to image generation with DALL-E 2",
 )
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "image")
 async def generate_with_dalle2(body: Dalle2ImageGenRequest):
     try:
@@ -169,7 +175,10 @@ async def generate_with_dalle2(body: Dalle2ImageGenRequest):
 )
 @ouro_field("x-ouro-input-asset-type", "file")
 @ouro_field("x-ouro-input-asset-filter", "image")
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "image")
 async def create_variation(body: ImageVariationRequest):
     try:
@@ -269,7 +278,10 @@ async def analyze_image(body: ImageAnalysisRequest):
     "/speech/generate",
     summary="Convert text to speech using OpenAI TTS",
 )
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "audio")
 async def generate_speech(body: TextToSpeechRequest):
     try:
@@ -310,11 +322,17 @@ async def generate_speech(body: TextToSpeechRequest):
     summary="Convert a post to speech using OpenAI TTS",
 )
 @ouro_field("x-ouro-input-asset-type", "post")
-@ouro_field("x-ouro-output-asset-type", "file")
+@ouro_field(
+    "x-ouro-output-assets",
+    {"file": {"asset_type": "file", "primary": True}},
+)
 @ouro_field("x-ouro-output-asset-filter", "audio")
 async def generate_speech_from_post(body: PostToSpeechRequest):
     try:
         text_content = body.post.content["text"]
+
+        # max 4096 characters
+
         # Generate speech from the post content
         response = client.audio.speech.create(
             model=body.model,

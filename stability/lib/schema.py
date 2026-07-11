@@ -34,15 +34,10 @@ class ImageGenRequest(BaseModel):
         description="A blurb of text describing what you do not wish to see in the output image.",
     )
     aspect_ratio: AspectRatioEnum = Field(
-        "1:1",
+        AspectRatioEnum.square,
         title="Aspect Ratio",
         description="Controls the aspect ratio of the generated image.",
     )
-    # output_format: str = Field(
-    #     "png",
-    #     title="Output Format",
-    #     description="Dictates the content-type of the generated image.",
-    # )
 
 
 class File(BaseModel):
@@ -73,11 +68,6 @@ class ControlRequest(BaseModel):
         title="Negative Prompt",
         description="A blurb of text describing what you do not wish to see in the output image.",
     )
-    # output_format: str = Field(
-    #     "png",
-    #     title="Output Format",
-    #     description="Dictates the content-type of the generated image.",
-    # )
 
 
 class Fast3DRequest(BaseModel):

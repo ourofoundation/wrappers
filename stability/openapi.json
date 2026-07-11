@@ -159,7 +159,7 @@
     },
     "/image-to-video": {
       "post": {
-        "summary": "Generate a short video based on an initial image",
+        "summary": "Generate a short video from an image",
         "description": "Generate a short video based on an initial image with Stable Video Diffusion, a latent video diffusion model.",
         "operationId": "image_to_video_image_to_video_post",
         "parameters": [
